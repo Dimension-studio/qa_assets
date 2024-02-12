@@ -1,1 +1,1 @@
-@python -m qa_assets
+@python -m qa_assets %*
