@@ -1,0 +1,25 @@
+{
+    "terminal.integrated.env.windows": {
+        "PYTHONBREAKPOINT": "ipdb.set_trace"
+    },
+    "terminal.integrated.defaultProfile.windows": "rez cmd",
+    "terminal.integrated.profiles.windows": {
+        "rez cmd": {
+            "path": "C:\\WINDOWS\\System32\\cmd.exe",
+            "args": [
+                "/k",
+                "T:\\pipeline\\rez_packages\\rez_init.bat"
+            ]
+        }
+    },
+    "python.formatting.provider": "autopep8",
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.pydocstyleEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.ignorePatterns": [
+        ".vscode/*.py",
+        "**/site-packages/**/*.py",
+        "tests/*.py"
+    ]
+}

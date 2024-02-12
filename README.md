@@ -1,2 +1,3 @@
-# qa_assets
+# QA assets
+
 Repository for the automated assets quality assurance

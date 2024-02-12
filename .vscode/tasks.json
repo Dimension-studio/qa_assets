@@ -1,0 +1,39 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run quality checks",
+            "type": "shell",
+            "command": "&& rez env dev_env ${workspaceFolderBasename} -- checks & exit",
+            "problemMatcher": [],
+            // "dependsOn": "Rez build, install local"
+        },
+        {
+            "label": "Run unit tests",
+            "type": "shell",
+            "command": "&& rez env ${workspaceFolderBasename} -- python tests\\test_all.py & exit",
+            "problemMatcher": [],
+            // "dependsOn": "Rez build, install local"
+        },
+        {
+            "label": "Rez build, install local",
+            "type": "shell",
+            "command": "&& rez-build -i -c & exit",
+            "problemMatcher": [],
+        },
+        {
+            "label": "Rez release",
+            "type": "shell",
+            "command": "&& rez-build -i -c -p ${env:REZ_RELEASE_PACKAGES_PATH} & exit",
+            "problemMatcher": [],
+        },
+        {
+            "label": "Build docs",
+            "type": "shell",
+            "command": "&& rmdir /s /q docs & rez env ${workspaceFolderBasename} dev_env -- pdoc -o docs -d google ./${workspaceFolderBasename} & exit",
+            "problemMatcher": [],
+        }
+    ]
+}
