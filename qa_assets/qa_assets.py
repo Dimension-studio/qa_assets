@@ -4,16 +4,14 @@ import sys
 import argparse
 
 
-def check(args):
-    """Check subcommand."""
-    print(args.check)
-    print(args.asset)
+def __check(args):
+    from .check import check  # pylint: disable=import-outside-toplevel
+    check(args)
 
 
-def submit(args):
-    """Submit subcommand."""
-    print("submit called")
-    raise NotImplementedError("Submit not yet implemented.")
+def __submit(args):
+    from .submit import submit  # pylint: disable=import-outside-toplevel
+    submit(args)
 
 
 def parse_args(args):
@@ -35,10 +33,10 @@ def parse_args(args):
                                        dest="subcommand")
 
     parser_check = subparsers.add_parser("check", help="The worker")
-    parser_check.set_defaults(func=check)
+    parser_check.set_defaults(func=__check)
 
     parser_submit = subparsers.add_parser("submit", help="The submitter")
-    parser_submit.set_defaults(func=submit)
+    parser_submit.set_defaults(func=__submit)
 
     # Check args
     parser_check.add_argument("--check",
@@ -49,6 +47,8 @@ def parse_args(args):
                               help="Specify the asset that the check(s) should be applied to, multiple assets are allowed.",
                               required=True,
                               action="append")
+    parser_check.add_argument("--scene",
+                              help="Save the Houdini scene into this path. This can be useful for debugging.")
 
     # Submit args
     parser_submit.add_argument("--check",

@@ -11,6 +11,7 @@ def version():
     return v_env["__version__"]
 
 requires = [
+    "houdini-19.0"
 ]
 
 build_requires = [
@@ -31,3 +32,6 @@ def commands():
 
     # Python module
     env.PYTHONPATH.append("{root}")
+
+    # Houdini config
+    env.HOUDINI_PATH.prepend("{root}/qa_assets/data")
