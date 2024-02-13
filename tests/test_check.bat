@@ -6,4 +6,5 @@ rez env qa_assets dev_env -- qa check ^
         --asset tests/tmp/test_geo/2.bgeo.sc ^
         --asset tests/tmp/test_geo/3.bgeo.sc ^
         --asset tests/tmp/test_geo/4.fbx ^
+        --asset tests/tmp/test_geo/missing ^
         --scene tests/tmp/check.hip
