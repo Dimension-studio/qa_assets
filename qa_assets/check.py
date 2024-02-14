@@ -2,16 +2,27 @@
 
 import os
 import hou
+import json
+import datetime
 
 
 def parse_node_warnings(warnings):
     """TBD"""
-    return warnings
+    # Handle nodes without warnings, e.g. File SOP
+    if not warnings:
+        return {}
+
+    # Assume a single warning per node
+    # Strip 'Vex error: ' from the beginning of the warning, which VEX inserts
+    warning_clean = warnings[0].lstrip("Vex error: ")
+    warning_dict = json.loads(warning_clean)
+
+    return warning_dict
 
 
 def parse_node_errors(errors):
     """TBD"""
-    return errors
+    return "\n".join(errors)
 
 
 def report_json_callback(kwargs):
@@ -49,20 +60,52 @@ def report_json_callback(kwargs):
     # Cook the report node
     try:
         node.cook()
-        cooked = True
+        cook_success = True
     except hou.OperationFailed:  # The cook has failed
-        cooked = False
+        cook_success = False
+
+    # The first report contains some metadata
+    reports = [
+        {
+            "user": os.environ.get("USERNAME", ""),
+            "node": os.environ.get("COMPUTERNAME", ""),
+            "time": str(datetime.datetime.now()),
+            "asset_path": chain[0].parm("file").eval(),
+            "cook_success": cook_success
+        }
+    ]
 
     # Collect reports from the chain
     for chain_node in chain:
-        if cooked:
-            cur_status = parse_node_warnings(chain_node.warnings())
+        if chain_node.type().name() in ["file"]:
+            continue
+
+        cur_warning = parse_node_warnings(chain_node.warnings())
+        cur_error = parse_node_errors(chain_node.errors())
+
+        # We assume that each check node has either an error or warning
+        if cur_error:
+            cur_status = "error"
         else:
-            cur_status = parse_node_errors(chain_node.errors())
+            cur_status = cur_warning["status"]
 
-        print(cur_status)
+        # Construct an individual report, add it to the list of reports
+        reports.append(
+            {
+                "node_name": chain_node.name(),
+                "node_type": chain_node.type().name(),
+                "status": cur_status,
+                "message": cur_error if cur_error else cur_warning["message"]
+            }
+        )
 
-    print()
+    # Create reports folder if needed
+    report_folder = os.path.dirname(json_path)
+    os.makedirs(report_folder, exist_ok=True)
+
+    # Save reports into a JSON file
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(reports, f, sort_keys=True, indent=4)
 
 
 def check(args):
