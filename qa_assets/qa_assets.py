@@ -1,6 +1,7 @@
 """Repository for the automated assets quality assurance."""
 
 import sys
+import time
 import argparse
 
 
@@ -67,10 +68,15 @@ def parse_args(args):
 
 def main():
     """Parse arguments and call the corresponding subcommand function."""
+    start = time.monotonic()
+
     args = parse_args(sys.argv[1:])
 
     # Call the subcommand function
     args.func(args)
+
+    end = time.monotonic()
+    print(f"Done in {(end - start):.2} seconds.")
 
 
 if __name__ == "__main__":
