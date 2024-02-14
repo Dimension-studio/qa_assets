@@ -11,7 +11,9 @@ def version():
     return v_env["__version__"]
 
 requires = [
-    "houdini-19.0"
+    "houdini-19.0",
+    "colorama",
+    "rich"
 ]
 
 build_requires = [

@@ -5,6 +5,53 @@ import hou
 import json
 import datetime
 
+# Fancy formatting
+from rich.tree import Tree
+from rich.theme import Theme
+from rich.console import Console
+from colorama import just_fix_windows_console
+
+
+def terminal_report(reports):
+    """TBD"""
+    # Initialize coloured output for windows
+    just_fix_windows_console()
+
+    # Specify themes, which will be used based on the check status
+    theme = Theme({
+        "pass": "green",
+        "warn": "dark_orange",
+        "fail": "bright_red",
+        "error": "red1"
+    })
+
+    console = Console(theme=theme)
+
+    asset_path = reports[0]["asset_path"]
+
+    # Find the overall status
+    overall_status = True
+    for cur_report in reports[1:]:
+        if cur_report["status"] != "pass":
+            overall_status = False
+            break
+
+    status_emoji = ":white_check_mark:" if overall_status else ":x:"
+    tree = Tree(f'{status_emoji} Checks for [bold]{asset_path}[/]')
+
+    # Iterate over reports
+    for cur_report in reports[1:]:
+        cur_status = cur_report["status"]
+
+        report_tree = tree.add(f'[b]{cur_report["node_name"]}[/]', style=cur_status)
+        report_tree.add(f'[b][{cur_status}]{cur_status.upper()}[/][/] | {cur_report["node_type"]}', style="default")
+
+        if cur_report["message"]:
+            report_tree.add(cur_report["message"], style="default")
+
+    print("\n")
+    console.print(tree)
+
 
 def parse_node_warnings(warnings):
     """TBD"""
@@ -67,6 +114,7 @@ def report_json_callback(kwargs):
     # The first report contains some metadata
     reports = [
         {
+            "report_version": "1",
             "user": os.environ.get("USERNAME", ""),
             "node": os.environ.get("COMPUTERNAME", ""),
             "time": str(datetime.datetime.now()),
@@ -106,6 +154,9 @@ def report_json_callback(kwargs):
     # Save reports into a JSON file
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(reports, f, sort_keys=True, indent=4)
+
+    # Write results to standard output
+    terminal_report(reports)
 
 
 def check(args):
