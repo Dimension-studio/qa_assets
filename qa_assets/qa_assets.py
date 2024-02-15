@@ -76,7 +76,7 @@ def main():
     args.func(args)
 
     end = time.monotonic()
-    print(f"Done in {(end - start):.2} seconds.")
+    print(f"Done in {(end - start):.2f} seconds.")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-rez env qa_assets dev_env -- qa check ^
+rez env qa_assets dev_env -- ^
+    qa check ^
         --check check_normalized_uvs ^
         --check check_polycount ^
         --check asset_info ^

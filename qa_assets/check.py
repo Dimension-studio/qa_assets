@@ -12,7 +12,7 @@ from rich.console import Console
 from colorama import just_fix_windows_console
 
 
-def terminal_report(reports):
+def terminal_report(report):
     """TBD"""
     # Initialize coloured output for windows
     just_fix_windows_console()
@@ -27,11 +27,11 @@ def terminal_report(reports):
 
     console = Console(theme=theme)
 
-    asset_path = reports[0]["asset_path"]
+    asset_path = report["asset_path"]
 
     # Find the overall status
     overall_status = True
-    for cur_report in reports[1:]:
+    for cur_report in report["reports"]:
         if cur_report["status"] != "pass":
             overall_status = False
             break
@@ -40,11 +40,11 @@ def terminal_report(reports):
     tree = Tree(f'{status_emoji} Checks for [bold]{asset_path}[/]')
 
     # Iterate over reports
-    for cur_report in reports[1:]:
+    for cur_report in report["reports"]:
         cur_status = cur_report["status"]
 
         report_tree = tree.add(f'[b]{cur_report["node_name"]}[/]', style=cur_status)
-        report_tree.add(f'[b][{cur_status}]{cur_status.upper()}[/][/] | {cur_report["node_type"]}', style="default")
+        report_tree.add(f'[b][{cur_status}]{cur_status.upper()}[/][/] | [i]{cur_report["node_type"]}[/]', style="default")
 
         if cur_report["message"]:
             report_tree.add(cur_report["message"], style="default")
@@ -112,16 +112,15 @@ def report_json_callback(kwargs):
         cook_success = False
 
     # The first report contains some metadata
-    reports = [
-        {
-            "report_version": "1",
-            "user": os.environ.get("USERNAME", ""),
-            "node": os.environ.get("COMPUTERNAME", ""),
-            "time": str(datetime.datetime.now()),
-            "asset_path": chain[0].parm("file").eval(),
-            "cook_success": cook_success
-        }
-    ]
+    output = {
+        "report_version": "1",
+        "user": os.environ.get("USERNAME", ""),
+        "node": os.environ.get("COMPUTERNAME", ""),
+        "time": str(datetime.datetime.now()),
+        "asset_path": chain[0].parm("file").eval(),
+        "cook_success": cook_success,
+        "reports": []
+    }
 
     # Collect reports from the chain
     for chain_node in chain:
@@ -138,7 +137,7 @@ def report_json_callback(kwargs):
             cur_status = cur_warning["status"]
 
         # Construct an individual report, add it to the list of reports
-        reports.append(
+        output["reports"].append(
             {
                 "node_name": chain_node.name(),
                 "node_type": chain_node.type().name(),
@@ -153,10 +152,10 @@ def report_json_callback(kwargs):
 
     # Save reports into a JSON file
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(reports, f, sort_keys=True, indent=4)
+        json.dump(output, f, sort_keys=True, indent=4)
 
     # Write results to standard output
-    terminal_report(reports)
+    terminal_report(output)
 
 
 def check(args):
