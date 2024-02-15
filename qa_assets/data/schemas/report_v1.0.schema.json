@@ -1,0 +1,75 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://dimensionstudio.co/report_v1.1.schema.json",
+    "title": "Report",
+    "description": "Report of an asset QA check",
+    "type": "object",
+    "properties": {
+        "asset_path": {
+            "type": "string",
+            "description": "File path to the asset, e.g. `tests/tmp/test_geo/1.obj`"
+        },
+        "cook_success": {
+            "type": "boolean",
+            "description": "Signals whether the QA chain for the asset has cooked successfully"
+        },
+        "node": {
+            "type": "string",
+            "description": "Name of the computer where the QA was run, e.g. `NODE55`"
+        },
+        "reports": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Any message that the check want to pass to the report, can be an empty string, e.g. `The polycount (123456) is too high!`"
+                    },
+                    "node_name": {
+                        "type": "string",
+                        "description": "Name of the check node in the Houdini scene, e.g. `check_polycount1`"
+                    },
+                    "node_type": {
+                        "type": "string",
+                        "description": "Houdini's node type name, e.g. `dimension::check_polycount::0.0.1`"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the check, can be one of the following: `pass, warn, fail, error`",
+                        "enum": ["pass", "warn", "fail", "error"]
+                    }
+                },
+                "required": [
+                    "message",
+                    "node_name",
+                    "node_type",
+                    "status"
+                ]
+            },
+            "description": "Individual reports of the checks that were run, in the order they were run"
+        },
+        "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the QA process was run, e.g. `2024-02-15 15:11:54.262979`"
+        },
+        "user": {
+            "type": "string",
+            "description": "User who has triggered the QA process, e.g. `juraj`"
+        },
+        "version": {
+            "type": "string",
+            "description": "Version of the report, e.g. `1.0`"
+        }
+    },
+    "required": [
+        "asset_path",
+        "cook_success",
+        "node",
+        "reports",
+        "time",
+        "user",
+        "version"
+    ]
+}
