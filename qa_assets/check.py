@@ -53,6 +53,23 @@ def terminal_report(report):
     console.print(tree)
 
 
+def get_input_nodes(node):
+    """TBD"""
+    chain = []
+
+    cur_node = node
+    while True:
+        cur_parent = cur_node.inputs()
+
+        if cur_parent:
+            chain.insert(0, cur_parent[0])
+            cur_node = cur_parent[0]
+        else:
+            break
+
+    return chain
+
+
 def parse_node_warnings(warnings):
     """TBD"""
     # Handle nodes without warnings, e.g. File SOP
@@ -70,6 +87,17 @@ def parse_node_warnings(warnings):
 def parse_node_errors(errors):
     """TBD"""
     return "\n".join(errors)
+
+
+def write_json_report(report, json_path):
+    """TBD"""
+    # Create reports folder if needed
+    report_folder = os.path.dirname(json_path)
+    os.makedirs(report_folder, exist_ok=True)
+
+    # Save reports into a JSON file
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, sort_keys=True, indent=4)
 
 
 def report_json_callback(kwargs):
@@ -92,17 +120,8 @@ def report_json_callback(kwargs):
     node = kwargs["node"]
     json_path = node.parm("json_path").eval()
 
-    # Build chain of parent (input) nodes, excluding the Report JSON node
-    chain = []
-    cur_node = node
-    while True:
-        cur_parent = cur_node.inputs()
-
-        if cur_parent:
-            chain.insert(0, cur_parent[0])
-            cur_node = cur_parent[0]
-        else:
-            break
+    # Build chain of parent (input) nodes, excluding the (last) Report JSON node
+    chain = get_input_nodes(node)
 
     # Cook the report node
     try:
@@ -111,7 +130,7 @@ def report_json_callback(kwargs):
     except hou.OperationFailed:  # The cook has failed
         cook_success = False
 
-    # The first report contains some metadata
+    # Populate output dict with some metadata
     output = {
         "report_version": "1",
         "user": os.environ.get("USERNAME", ""),
@@ -124,6 +143,7 @@ def report_json_callback(kwargs):
 
     # Collect reports from the chain
     for chain_node in chain:
+        # Skip the "loader" nodes, e.g. a File SOP
         if chain_node.type().name() in ["file"]:
             continue
 
@@ -146,15 +166,10 @@ def report_json_callback(kwargs):
             }
         )
 
-    # Create reports folder if needed
-    report_folder = os.path.dirname(json_path)
-    os.makedirs(report_folder, exist_ok=True)
+    # Save JSON report
+    write_json_report(output, json_path)
 
-    # Save reports into a JSON file
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(output, f, sort_keys=True, indent=4)
-
-    # Write results to standard output
+    # Write results to the terminal too
     terminal_report(output)
 
 
