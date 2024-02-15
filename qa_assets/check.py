@@ -158,6 +158,55 @@ def report_json_callback(kwargs):
     terminal_report(output)
 
 
+def create_load_node(parent_node, asset_name, asset_path):
+    """TBD"""
+    node = parent_node.createNode("file", node_name=f"file_{asset_name}")
+    node.parm("file").set(asset_path)
+
+    return node
+
+
+def create_check_nodes(parent_node, checks):
+    """TBD"""
+    chain = []
+
+    for check_name in checks:
+        try:
+            check_node = parent_node.createNode(check_name)
+        except hou.OperationFailed as e:
+            # Reraise invalid node type name as ValueError
+            if e.instanceMessage() == "Invalid node type name":
+                raise ValueError(f"Invalid node name: '{check_name}'") from e
+
+            raise  # Reraise the original exception - in case something else has happened
+
+        chain.append(check_node)
+
+    return chain
+
+
+def create_report_node(parent_node, asset_name, asset_path):
+    """TBD"""
+    # Houdini prefers forward slashes on all platforms
+    report_path = os.path.join(os.path.dirname(asset_path),
+                               "reports",
+                               f"{asset_name}.json").replace("\\", "/")
+
+    node = parent_node.createNode("dimension::report_json")
+    node.parm("json_path").set(report_path)
+
+    return node
+
+
+def connect_node_chain(chain):
+    """TBD"""
+    for i, node in enumerate(chain):
+        if i == 0:  # Skip the 1st node
+            continue
+
+        node.setFirstInput(chain[i - 1])
+
+
 def check(args):
     """Check subcommand.
 
@@ -179,42 +228,21 @@ def check(args):
         asset_name = os.path.basename(asset_path)
 
         # Load asset
-        file = checks_geo.createNode("file", node_name=f"file_{asset_name}")
-        file.parm("file").set(asset_path)
+        file = create_load_node(checks_geo, asset_name, asset_path)
 
-        # Iterate over checks, create the node chain (file -> check1 -> check2 -> ...)
-        chain = [file]
-
-        # Create nodes
-        for check_name in args.check:
-            try:
-                check_node = checks_geo.createNode(check_name)
-            except hou.OperationFailed as e:
-                # Reraise invalid node type name as ValueError
-                if e.instanceMessage() == "Invalid node type name":
-                    raise ValueError(f"Invalid node name: '{check_name}'") from e
-
-                raise
-
-            chain.append(check_node)
+        # Create check nodes
+        check_nodes = create_check_nodes(checks_geo, args.check)
 
         # Create the Report JSON node
-        report_path = os.path.join(os.path.dirname(asset_path_abs),
-                                   "reports",
-                                   f"{asset_name}.json").replace("\\", "/")  # Houdini prefers forward slashes on all platforms
+        report_node = create_report_node(checks_geo, asset_name, asset_path_abs)
 
-        report_node = checks_geo.createNode("dimension::report_json")
-        report_node.parm("json_path").set(report_path)
-
-        chain.append(report_node)
-        report_nodes.append(report_node)
+        # Create a node chain for the current asset (file -> check1 -> check2 -> ... -> report)
+        chain = [file] + check_nodes + [report_node]
 
         # Create node connections
-        for i, node in enumerate(chain):
-            if i == 0:  # Skip the 1st node
-                continue
+        connect_node_chain(chain)
 
-            node.setFirstInput(chain[i - 1])
+        report_nodes.append(report_node)
 
     # Layout
     checks_geo.layoutChildren()
