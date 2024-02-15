@@ -11,9 +11,16 @@ from rich.theme import Theme
 from rich.console import Console
 from colorama import just_fix_windows_console
 
+# Specify report version
+REPORT_VERSION = "1.0"
+
 
 def terminal_report(report):
-    """TBD"""
+    """TBD, raises assertionerror"""
+    # Make sure we are calling it with the expected report
+    assert report["version"] == REPORT_VERSION, \
+        f"""Report's version "{report["version"]}" does not match the expected one "{REPORT_VERSION}"""""
+
     # Initialize coloured output for windows
     just_fix_windows_console()
 
@@ -132,7 +139,7 @@ def report_json_callback(kwargs):
 
     # Populate output dict with some metadata
     output = {
-        "report_version": "1",
+        "version": REPORT_VERSION,
         "user": os.environ.get("USERNAME", ""),
         "node": os.environ.get("COMPUTERNAME", ""),
         "time": str(datetime.datetime.now()),

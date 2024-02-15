@@ -13,7 +13,7 @@ def create_load_node(parent_node, asset_name, asset_path):
 
 
 def create_check_nodes(parent_node, checks):
-    """TBD"""
+    """TBD, raises valueerror"""
     chain = []
 
     for check_name in checks:
