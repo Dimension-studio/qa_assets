@@ -71,7 +71,8 @@ def create_report_node(parent_node, asset_name, asset_path):
                                "reports",
                                f"{asset_name}.json").replace("\\", "/")
 
-    node = parent_node.createNode("dimension::report_json")
+    node = parent_node.createNode("dimension::report_json",
+                                  node_name=f"report_{asset_name}")
     node.parm("json_path").set(report_path)
 
     return node
