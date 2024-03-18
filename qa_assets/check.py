@@ -17,7 +17,7 @@ def create_load_node(parent_node, asset_name, asset_path):
 
     """
     node = parent_node.createNode("file", node_name=f"file_{asset_name}")
-    node.parm("file").set(asset_path)
+    node.parm("file").set(asset_path.replace("\\", "/"))  # Use forward slashes
 
     return node
 
@@ -132,7 +132,8 @@ def check(args):
 
     # Save scene for debugging
     if args.scene:
-        hou.hipFile.save(args.scene, save_to_recent_files=False)
+        hou.hipFile.save(args.scene.replace("\\", "/"),
+                         save_to_recent_files=False)
 
     # Create reports by triggering report nodes
     for report in report_nodes:
