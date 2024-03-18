@@ -1,4 +1,4 @@
-"""TBD"""
+"""Implement the reporting functionality. This handles the passing of informatino out of Houdini nodes into a report saved on a disk."""
 
 import os
 import hou
@@ -16,7 +16,15 @@ REPORT_VERSION = "1.0"
 
 
 def terminal_report(report):
-    """TBD, raises assertionerror"""
+    """Report checks results into the terminal with some nice formatting.
+
+    Args:
+        report (dict): A checks report
+
+    Raises:
+        AssertionError: When report's version does not match the expected one (specified in the `REPORT_VERSION` global var of this module)
+
+    """
     # Make sure we are calling it with the expected report
     assert report["version"] == REPORT_VERSION, \
         f"""Report's version "{report["version"]}" does not match the expected one "{REPORT_VERSION}"""""
@@ -61,7 +69,14 @@ def terminal_report(report):
 
 
 def get_input_nodes(node):
-    """TBD"""
+    """Construct a list of the input nodes from the specified `node`. It walks input connections until the end. The returned nodes will be in the "descending" order, but the last node (the passed `node`) is not included in the list - the reporting node is not included in the report.
+
+    Args:
+        node (hou.Node): Node which inputs will be collected
+
+    Returns
+        (:obj:`list` of :obj:`hou.Node`): All input nodes
+    """
     chain = []
 
     cur_node = node
@@ -78,7 +93,15 @@ def get_input_nodes(node):
 
 
 def parse_node_warnings(warnings):
-    """TBD"""
+    """Parse the `warnings` string into a dictionary. The `warnings` is being accessed via Houdini's API and is set in VEX.
+
+    Args:
+        warnings (str): The string to be parsed
+
+    Returns:
+        dict: The parsed dict. The dict can be empty if a node does not report anything.
+
+    """
     # Handle nodes without warnings, e.g. File SOP
     if not warnings:
         return {}
@@ -92,12 +115,25 @@ def parse_node_warnings(warnings):
 
 
 def parse_node_errors(errors):
-    """TBD"""
+    """Parse the `errors` str list into a string. The `errors` is a list of error messages raised by a node in Houdini.
+
+    Args:
+        errors (:obj:`list` of :obj:`str`): The list to be parsed
+
+    Returns:
+        dict: The parsed str. The str can be empty if a node does not report anything.
+
+    """
     return "\n".join(errors)
 
 
 def write_json_report(report, json_path):
-    """TBD"""
+    """Write `report` into the specified `json_path`.
+
+    Args:
+        report (dict): The report to be saved
+        json_path (str): File path where the report should be written into
+    """
     # Create reports folder if needed
     report_folder = os.path.dirname(json_path)
     os.makedirs(report_folder, exist_ok=True)
@@ -137,7 +173,7 @@ def report_json_callback(kwargs):
     except hou.OperationFailed:  # The cook has failed
         cook_success = False
 
-    # Populate output dict with some metadata
+    # Populate the output dict with some metadata
     output = {
         "version": REPORT_VERSION,
         "user": os.environ.get("USERNAME", ""),
