@@ -22,7 +22,7 @@ class RunTests(unittest.TestCase):
                     },
                                     {
                         "node_type_name": "report_json",
-                        "parm_sopoutput": "$REPORT_PATH",
+                        "parm_json_path": "$REPORT_PATH",
                         "press_write": true
                     },
                     {
@@ -32,7 +32,29 @@ class RunTests(unittest.TestCase):
                     }
                 ]
             }"""
-        pipe_expected = json.loads(pipe)
+
+        pipe_expected = {
+           "nodes": [
+                {
+                    "node_type_name": "file",
+                    "parm_file": "$ASSET_INPUT_PATH"
+                },
+                {
+                    "node_type_name": "clean",
+                    "parm_fixoverlap": True
+                },
+                                {
+                    "node_type_name": "report_json",
+                    "parm_json_path": "$REPORT_PATH",
+                    "press_write": True
+                },
+                {
+                    "node_type_name": "rop_geometry",
+                    "parm_sopoutput": "$ASSET_OUTPUT_PATH",
+                    "press_execute": True
+                }
+            ]
+        }
 
         self.assertEqual(run.verify_pipeline(pipe), pipe_expected)
 
@@ -90,6 +112,18 @@ class RunTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             run.verify_pipeline(pipe)
 
+    def test_substitutions(self):
+        asset = "path\\to\\assets\\foo.fbx"
+
+        subs = run.generate_substitutions(asset)
+        expected_subs = {
+            "$ASSET_INPUT_PATH": "path/to/assets/foo.fbx",
+            "$REPORT_PATH": "path/to/assets/reports/foo.fbx.json",
+            "$ASSET_OUTPUT_PATH": "path/to/assets/outputs/foo.fbx"
+        }
+
+        self.assertEqual(subs, expected_subs)
+
 
 class HoudiniTests(unittest.TestCase):
     def test_crete_connect_query_chain(self):
@@ -130,6 +164,104 @@ class HoudiniTests(unittest.TestCase):
             parent.node("facet1")
         ]
         self.assertEqual(inputs, expected_inputs)
+
+    def test_nodes_from_pipe(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        asset = "path\\to\\assets\\foo.fbx"
+        subs = run.generate_substitutions(asset)
+
+        pipe = {
+           "nodes": [
+                {
+                    "node_type_name": "file",
+                    "parm_file": "$ASSET_INPUT_PATH"
+                },
+                {
+                    "node_type_name": "clean",
+                    "parm_fixoverlap": True
+                },
+                {
+                    "node_type_name": "report_json",
+                    "parm_json_path": "$REPORT_PATH",
+                    "press_write": True
+                },
+                {
+                    "node_type_name": "rop_geometry",
+                    "parm_sopoutput": "$ASSET_OUTPUT_PATH",
+                    "press_execute": True
+                }
+            ]
+        }
+
+        nodes = run.create_nodes_from_pipeline(pipe, parent, subs)
+
+        # Checks
+        # Check if nodes got created
+        check_names = [
+            "file1",
+            "clean1",
+            "report_json1",
+            "rop_geometry1",
+        ]
+        for name in check_names:
+            self.assertIsNotNone(parent.node(name))
+
+        # Check parm values
+        self.assertEqual(
+            parent.node("file1").parm("file").eval(),
+            subs["$ASSET_INPUT_PATH"]
+        )
+
+        self.assertEqual(
+            parent.node("clean1").parm("fixoverlap").eval(),
+            1
+        )
+
+        self.assertEqual(
+            parent.node("report_json1").parm("json_path").eval(),
+            subs["$REPORT_PATH"]
+        )
+
+        self.assertEqual(
+            parent.node("rop_geometry1").parm("sopoutput").eval(),
+            subs["$ASSET_OUTPUT_PATH"]
+        )
+
+    def test_nodes_from_pipe_bad_node(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        asset = "path\\to\\assets\\foo.fbx"
+        subs = run.generate_substitutions(asset)
+
+        pipe = {
+            "nodes": [
+                {
+                    "node_type_name": "asdgfdgfdasfsdsf",
+                }
+            ]
+        }
+
+        with self.assertRaises(ValueError):
+            run.create_nodes_from_pipeline(pipe, parent, subs)
+
+    def test_nodes_from_pipe_bad_parm(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        asset = "path\\to\\assets\\foo.fbx"
+        subs = run.generate_substitutions(asset)
+
+        pipe = {
+            "nodes": [
+                {
+                    "node_type_name": "file",
+                    "parm_dasddsadapoda": "foobar"
+                }
+            ]
+        }
+
+        with self.assertRaises(ValueError):
+            run.create_nodes_from_pipeline(pipe, parent, subs)
 
     def tearDown(self):
         hou.hipFile.clear() # Clear up Houdini scene between tests
