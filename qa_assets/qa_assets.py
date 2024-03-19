@@ -11,7 +11,7 @@ def __check(args):
 
 
 def __run(args):
-    from .check import run  # pylint: disable=import-outside-toplevel
+    from .run import run  # pylint: disable=import-outside-toplevel
     run(args)
 
 
