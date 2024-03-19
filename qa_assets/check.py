@@ -139,3 +139,14 @@ def check(args):
     # Create reports by triggering report nodes
     for report in report_nodes:
         report.parm("write").pressButton()
+
+def run(args):
+    """Run subcommand.
+
+    Args:
+        args (argparse.ArgumentParser): Parsed arguments
+
+    Raises:
+        ValueError: If a check node could not be created, e.g. if a such node does not exist
+    """
+    pass

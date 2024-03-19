@@ -10,6 +10,11 @@ def __check(args):
     check(args)
 
 
+def __run(args):
+    from .check import run  # pylint: disable=import-outside-toplevel
+    run(args)
+
+
 def __submit(args):
     from .submit import submit  # pylint: disable=import-outside-toplevel
     submit(args)
@@ -36,6 +41,9 @@ def parse_args(args):
     parser_check = subparsers.add_parser("check", help="The worker")
     parser_check.set_defaults(func=__check)
 
+    parser_run = subparsers.add_parser("run", help="The worker v2")
+    parser_run.set_defaults(func=__run)
+
     parser_submit = subparsers.add_parser("submit", help="The submitter")
     parser_submit.set_defaults(func=__submit)
 
@@ -50,6 +58,17 @@ def parse_args(args):
                               action="append")
     parser_check.add_argument("--scene",
                               help="Save the Houdini scene into this path. This can be useful for debugging.")
+
+    # Run args
+    parser_run.add_argument("--pipeline",
+                            help="A JSON-formatted pipeline that specifies what checks should be applied.",
+                            required=True)
+    parser_run.add_argument("--asset",
+                            help="Specify the asset that the check(s) should be applied to, multiple assets are allowed.",
+                            required=True,
+                            action="append")
+    parser_run.add_argument("--scene",
+                            help="Save the Houdini scene into this path. This can be useful for debugging.")
 
     # Submit args
     parser_submit.add_argument("--check",
