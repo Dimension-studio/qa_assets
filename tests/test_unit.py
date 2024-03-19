@@ -1,12 +1,97 @@
 """Perform unit tests."""
 
 import hou
+import json
 import unittest
 
-from qa_assets import report, check
+from qa_assets import report, check, run
 
 
-class TestStuff(unittest.TestCase):
+class RunTests(unittest.TestCase):
+    def test_verify_valid(self):
+        pipe = """\
+            {
+                "nodes": [
+                    {
+                        "node_type_name": "file",
+                        "parm_file": "$ASSET_INPUT_PATH"
+                    },
+                    {
+                        "node_type_name": "clean",
+                        "parm_fixoverlap": true
+                    },
+                                    {
+                        "node_type_name": "report_json",
+                        "parm_sopoutput": "$REPORT_PATH",
+                        "press_write": true
+                    },
+                    {
+                        "node_type_name": "rop_geometry",
+                        "parm_sopoutput": "$ASSET_OUTPUT_PATH",
+                        "press_execute": true
+                    }
+                ]
+            }"""
+        pipe_expected = json.loads(pipe)
+
+        self.assertEqual(run.verify_pipeline(pipe), pipe_expected)
+
+    def test_verify_1(self):
+        pipe = """\
+            {
+                "foo": "bar"
+            }"""
+
+        with self.assertRaises(AssertionError):
+            run.verify_pipeline(pipe)
+
+    def test_verify_2(self):
+        pipe = """\
+            {
+                "nodes": "bar"
+            }"""
+
+        with self.assertRaises(AssertionError):
+            run.verify_pipeline(pipe)
+
+    def test_verify_3(self):
+        pipe = """\
+            {
+                "nodes": [1]
+            }"""
+
+        with self.assertRaises(AssertionError):
+            run.verify_pipeline(pipe)
+
+    def test_verify_4(self):
+        pipe = """\
+            {
+                "nodes": [
+                    {
+                        "parm_file": "$ASSET_INPUT_PATH"
+                    }
+                ]
+            }"""
+
+        with self.assertRaises(AssertionError):
+            run.verify_pipeline(pipe)
+
+    def test_verify_5(self):
+        pipe = """\
+            {
+                "nodes": [
+                    {
+                        "node_type_name": "file",
+                        "foo": "bar"
+                    }
+                ]
+            }"""
+
+        with self.assertRaises(AssertionError):
+            run.verify_pipeline(pipe)
+
+
+class HoudiniTests(unittest.TestCase):
     def test_crete_connect_query_chain(self):
         # Prepare scene
         parent = hou.node("/obj").createNode("geo")
