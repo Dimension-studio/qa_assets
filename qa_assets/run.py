@@ -67,10 +67,10 @@ def create_nodes_from_pipeline(pipeline, parent_node, subsitutions):
             raise  # Reraise the original exception - in case something else has happened
 
         # Set node's parms from the node_dict
-        for key, value in node_dict.iter():
+        for key, value in node_dict.items():
             if key.startswith("parm_"):
                 cur_parm_name = key.replace("parm_", "")
-                cur_parm = cur_node.parm(cur_node_name)
+                cur_parm = cur_node.parm(cur_parm_name)
 
                 # Check if the parm name is correct
                 if cur_parm is None:
@@ -78,7 +78,7 @@ def create_nodes_from_pipeline(pipeline, parent_node, subsitutions):
 
                 # Handle special cases - variables that need to be substituted
                 substituted = False
-                for sub_key, sub_value in subsitutions.iter():
+                for sub_key, sub_value in subsitutions.items():
                     if value == sub_key:
                         cur_parm.set(sub_value)
                         substituted = True
@@ -132,7 +132,7 @@ def run(args):
                 },
                                 {
                     "node_type_name": "report_json",
-                    "parm_sopoutput": "$REPORT_PATH",
+                    "parm_json_path": "$REPORT_PATH",
                     "press_write": true
                 },
                 {
