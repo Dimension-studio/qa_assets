@@ -188,11 +188,15 @@ def report_json_callback(kwargs):
     json_path = node.parm("json_path").eval()
 
     # Build chain of parent (input) nodes, excluding the (last) Report JSON node
-    chain = get_input_nodes(node)
+    chain = get_input_nodes(node) + [node] + get_output_nodes(node)
 
-    # Cook the report node
+    # Get the last node to be cooked
+    # Cooking ROP nodes does not trigger errors, so in that case cook the node before the rop
+    node_to_cook = chain[-2] if chain[-1].type().name().startswith("rop_") else chain[-1]
+
+    # Cook the last node in the chain
     try:
-        node.cook()
+        node_to_cook.cook()
         cook_success = True
     except hou.OperationFailed:  # The cook has failed
         cook_success = False
