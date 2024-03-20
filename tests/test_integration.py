@@ -6,6 +6,28 @@ import unittest
 import subprocess
 
 
+class TestRun2(unittest.TestCase):
+    def test_run(self):
+        #Remove previous reports, outputs
+        shutil.rmtree("tests\\tmp\\test_geo_run\\reports", ignore_errors=True)
+        shutil.rmtree("tests\\tmp\\test_geo_run\\otuputs", ignore_errors=True)
+
+        cmd = [
+            "qa.cmd", "run",
+            "--pipeline_file", "tests\\test_pipeline.json",
+            "--scene", "tests\\tmp\\run.hip"
+        ]
+
+        outputs = ["1.obj", "2.bgeo.sc", "3.bgeo.sc", "4.fbx", "missing"]
+
+        for output in outputs:
+            cmd.extend(["--asset",
+                        os.path.join("tests\\tmp\\test_geo_run", output)
+            ])
+
+        subprocess.check_call(cmd)  # stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+
+
 class TestRun(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

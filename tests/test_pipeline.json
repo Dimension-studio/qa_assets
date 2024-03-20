@@ -1,0 +1,31 @@
+{
+    "nodes": [
+        {
+            "node_type_name": "file",
+            "parm_file": "$ASSET_INPUT_PATH"
+        },
+        {
+            "node_type_name": "clean",
+            "parm_fixoverlap": true
+        },
+        {
+            "node_type_name": "check_polycount"
+        },
+        {
+            "node_type_name": "check_normalized_uvs"
+        },
+        {
+            "node_type_name": "asset_info"
+        },
+                        {
+            "node_type_name": "report_json",
+            "parm_json_path": "$REPORT_PATH",
+            "press_write": true
+        },
+        {
+            "node_type_name": "rop_geometry",
+            "parm_sopoutput": "$ASSET_OUTPUT_PATH",
+            "press_execute": true
+        }
+    ]
+}
