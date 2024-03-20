@@ -52,7 +52,7 @@ def terminal_report(report):
             break
 
     status_emoji = ":white_check_mark:" if overall_status else ":x:"
-    tree = Tree(f'{status_emoji} Checks for [bold]{asset_path}[/]')
+    tree = Tree(f'{status_emoji} Nodes for [bold]{asset_path}[/]')
 
     # Iterate over reports
     for cur_report in report["reports"]:
@@ -214,18 +214,19 @@ def report_json_callback(kwargs):
 
     # Collect reports from the chain
     for chain_node in chain:
-        # Skip the "loader" nodes, e.g. a File SOP
-        if chain_node.type().name() in ["file"]:
-            continue
-
         cur_warning = parse_node_warnings(chain_node.warnings())
         cur_error = parse_node_errors(chain_node.errors())
 
-        # We assume that each check node has either an error or warning
+        # We assume that each check node has an error, warning, or neither
         if cur_error:
             cur_status = "error"
-        else:
+            message = cur_error
+        elif cur_warning:
             cur_status = cur_warning["status"]
+            message = cur_warning["message"]
+        else:
+            cur_status = "pass"
+            message = ""
 
         # Construct an individual report, add it to the list of reports
         output["reports"].append(
@@ -233,7 +234,7 @@ def report_json_callback(kwargs):
                 "node_name": chain_node.name(),
                 "node_type": chain_node.type().name(),
                 "status": cur_status,
-                "message": cur_error if cur_error else cur_warning["message"]
+                "message": message
             }
         )
 
