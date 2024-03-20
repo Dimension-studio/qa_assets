@@ -51,6 +51,7 @@ def create_nodes_from_pipeline(pipeline, parent_node, subsitutions):
     pipeline_nodes = pipeline["nodes"]
 
     nodes = []
+    buttons = []
 
     # Create nodes
     for node_dict in pipeline_nodes:
@@ -67,6 +68,7 @@ def create_nodes_from_pipeline(pipeline, parent_node, subsitutions):
             raise  # Reraise the original exception - in case something else has happened
 
         # Set node's parms from the node_dict
+        # Store buttons to be pressed
         for key, value in node_dict.items():
             if key.startswith("parm_"):
                 cur_parm_name = key.replace("parm_", "")
@@ -87,9 +89,19 @@ def create_nodes_from_pipeline(pipeline, parent_node, subsitutions):
                 if not substituted:
                     cur_parm.set(value)
 
+            elif key.startswith("press_"):
+                cur_button_name = key.replace("press_", "")
+                cur_button = cur_node.parm(cur_button_name)
+
+                # Check if the parm name is correct
+                if cur_button is None:
+                    raise ValueError(f"Invalid button name: '{cur_button_name}' in '{cur_node_name}'")
+
+                buttons.append(cur_button)
+
         nodes.append(cur_node)
 
-    return nodes
+    return nodes, buttons
 
 
 def generate_substitutions(asset_path):
@@ -161,10 +173,19 @@ def run(args):
         substitutions = generate_substitutions(asset_path)
 
         # Create nodes from pipeline
-        cur_nodes = create_nodes_from_pipeline(pipe, checks_geo, substitutions)
+        cur_nodes, cur_buttons = create_nodes_from_pipeline(pipe, checks_geo, substitutions)
 
         # Connect our nodes
         connect_node_chain(cur_nodes)
+
+        buttons_to_be_pressed.extend(cur_buttons)
+
+    # Press buttons
+    for button in buttons_to_be_pressed:
+        button.pressButton()
+
+    # Layout
+    checks_geo.layoutChildren()
 
     # Save scene for debugging
     if args.scene:
