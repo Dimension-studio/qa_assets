@@ -161,7 +161,14 @@ def run(args):
     Raises:
         ValueError: If a check node could not be created, e.g. if a such node does not exist
     """
-    pipe = verify_pipeline(args.pipeline)
+    # Read the pipeline from argument, or file
+    if args.pipeline:
+        pipe_str = args.pipeline
+    elif args.pipeline_file:
+        with open(args.pipeline_file, encoding="utf-8") as f:
+            pipe_str = f.read()
+
+    pipe = verify_pipeline(pipe_str)
 
     checks_geo = hou.node("/obj").createNode("geo", node_name="checks")
 

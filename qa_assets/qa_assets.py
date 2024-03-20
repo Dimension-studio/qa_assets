@@ -60,9 +60,11 @@ def parse_args(args):
                               help="Save the Houdini scene into this path. This can be useful for debugging.")
 
     # Run args
-    parser_run.add_argument("--pipeline",
-                            help="A JSON-formatted pipeline that specifies what checks should be applied.",
-                            required=True)
+    pipe_group = parser_run.add_mutually_exclusive_group(required=True)
+    pipe_group.add_argument("--pipeline",
+                            help="A JSON-formatted pipeline string that specifies what checks should be applied.")
+    pipe_group.add_argument("--pipeline_file",
+                            help="A JSON pipeline (utf-8 encoded) file that specifies what checks should be applied.")
     parser_run.add_argument("--asset",
                             help="Specify the asset that the check(s) should be applied to, multiple assets are allowed.",
                             required=True,
