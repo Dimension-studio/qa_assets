@@ -1,7 +1,6 @@
 """Perform unit tests."""
 
 import hou
-import json
 import unittest
 
 from qa_assets import report, check, run
@@ -194,7 +193,7 @@ class HoudiniTests(unittest.TestCase):
             ]
         }
 
-        nodes = run.create_nodes_from_pipeline(pipe, parent, subs)
+        nodes, buttons = run.create_nodes_from_pipeline(pipe, parent, subs)
 
         # Checks
         # Check if nodes got created
@@ -206,6 +205,11 @@ class HoudiniTests(unittest.TestCase):
         ]
         for name in check_names:
             self.assertIsNotNone(parent.node(name))
+
+        # Check buttons
+        self.assertEqual(len(buttons), 2)
+        self.assertEqual(buttons[0].name(), "write")
+        self.assertEqual(buttons[1].name(), "execute")
 
         # Check parm values
         self.assertEqual(
