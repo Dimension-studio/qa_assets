@@ -263,6 +263,68 @@ class HoudiniTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.create_nodes_from_pipeline(pipe, parent, subs)
 
+    def test_input_nodes(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        file = parent.createNode("file")
+        clean = parent.createNode("clean")
+        facet = parent.createNode("facet")
+
+        check.connect_node_chain([file, clean, facet])
+
+        self.assertEqual(
+            report.get_input_nodes(facet),
+            [file, clean]
+        )
+
+    def test_input_nodes_empty(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        file = parent.createNode("file")
+
+        self.assertEqual(
+            report.get_input_nodes(file),
+            []
+        )
+
+    def test_output_nodes(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        file = parent.createNode("file")
+        clean = parent.createNode("clean")
+        facet = parent.createNode("facet")
+
+        check.connect_node_chain([file, clean, facet])
+
+        self.assertEqual(
+            report.get_output_nodes(file),
+            [clean, facet]
+        )
+
+    def test_output_nodes_empty(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        file = parent.createNode("file")
+
+        self.assertEqual(
+            report.get_output_nodes(file),
+            []
+        )
+
+    def test_input_output_nodes_chain(self):
+        parent = hou.node("/obj").createNode("geo")
+
+        file = parent.createNode("file")
+        clean = parent.createNode("clean")
+        facet = parent.createNode("facet")
+
+        check.connect_node_chain([file, clean, facet])
+
+        self.assertEqual(
+            report.get_input_nodes(clean) + [clean] + report.get_output_nodes(clean),
+            [file, clean, facet]
+        )
+
     def tearDown(self):
         hou.hipFile.clear() # Clear up Houdini scene between tests
 

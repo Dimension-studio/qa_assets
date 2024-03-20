@@ -69,7 +69,7 @@ def terminal_report(report):
 
 
 def get_input_nodes(node):
-    """Construct a list of the input nodes from the specified `node`. It walks input connections until the end. The returned nodes will be in the "descending" order, but the last node (the passed `node`) is not included in the list - the reporting node is not included in the report.
+    """Construct a list of the input nodes from the specified `node`. It walks input connections until the end. The returned nodes will be in the "descending" order, but the last node (the passed `node`) is not included in the list. This includes only the first input.
 
     Args:
         node (hou.Node): Node which inputs will be collected
@@ -86,6 +86,30 @@ def get_input_nodes(node):
         if cur_parent:
             chain.insert(0, cur_parent[0])
             cur_node = cur_parent[0]
+        else:
+            break
+
+    return chain
+
+
+def get_output_nodes(node):
+    """Construct a list of the output nodes from the specified `node`. It walks output connections until the end. The returned nodes will be in the "descending" order, but the first node (the passed `node`) is not included in the list. This includes only the first output.
+
+    Args:
+        node (hou.Node): Node which outputs will be collected
+
+    Returns
+        (:obj:`list` of :obj:`hou.Node`): All output nodes
+    """
+    chain = []
+
+    cur_node = node
+    while True:
+        cur_child = cur_node.outputs()
+
+        if cur_child:
+            chain.append(cur_child[0])
+            cur_node = cur_child[0]
         else:
             break
 
