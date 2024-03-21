@@ -5,8 +5,14 @@
             "parm_file": "$ASSET_INPUT_PATH"
         },
         {
+            "node_type_name": "divide",
+            "parm_numsides": 4
+        },
+        {
             "node_type_name": "clean",
-            "parm_fixoverlap": true
+            "parm_fusepts": true,
+            "parm_fixoverlap": true,
+            "parm_make_manifold": true
         },
         {
             "node_type_name": "check_polycount"
