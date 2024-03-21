@@ -23,7 +23,7 @@
         {
             "node_type_name": "asset_info"
         },
-                        {
+        {
             "node_type_name": "report_json",
             "parm_json_path": "$REPORT_PATH",
             "press_write": true
