@@ -37,7 +37,7 @@ function dropJSON(targetEl, callback) {
         }
 
         // Revert the dashed box border
-        targetEl.classList.remove("border-dashed", "border-2")
+        targetEl.classList.remove("border-dashed", "border-2");
 
         e.preventDefault();
     });
@@ -48,5 +48,50 @@ dropJSON(document.querySelector("#drop-target"), JSONReport);
 
 // JSON-processing function
 function JSONReport(data) {
-    console.log(data);
+    let reportsEl = document.querySelector("#reports");
+    let name = data.name;
+    let report = data.data;
+
+    let reportLIs = "";
+
+    report.reports.forEach(el => {
+        let msg = "";
+        if (el.message.length > 0)
+            msg = `<p>${el.message}</p>`;
+
+        let status;
+        if (el.status === "pass") status = "success";
+        else if (el.status === "warn") status = "warning";
+        else if (el.status === "fail") status = "danger";
+        else if (el.status === "error") status = "danger";
+
+        reportLIs += `
+        <li class="list-group-item">
+            <span class="badge text-bg-${status}">${el.status.toUpperCase()}</span> ${el.node_name}<br>
+            <code>${el.node_type}</code>
+            ${msg}
+        </li>
+        `
+    });
+
+    let reportHTML = `
+    <div class="col">
+        <div class="card border-success">
+            <div class="card-body">
+                <h5 class="card-title">${name}</h5>
+                <code>
+                    ${report.asset_path}
+                </code>
+                <p class="card-subtitle mt-1 mb-2 text-muted small">
+                    Cooked: ${report.cook_success}, ${report.user}@${report.node}, ${report.time}
+                </p>
+                <ul class="list-group">
+                    ${reportLIs}
+                </ul>
+            </div>
+        </div>
+    </div>
+    `
+
+    reportsEl.innerHTML += reportHTML;
 };
