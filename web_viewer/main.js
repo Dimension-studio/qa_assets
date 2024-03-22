@@ -59,7 +59,7 @@ function JSONReport(data) {
     report.reports.forEach(el => {
         let msg = "";
         if (el.message.length > 0)
-            msg = `<p>${el.message}</p>`;
+            msg = `<details><summary class="text-muted small">Details</summary><p>${el.message}</p></details>`;
 
         let status;
         if (el.status === "pass") status = "success";
