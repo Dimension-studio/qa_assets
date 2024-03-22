@@ -52,6 +52,8 @@ function JSONReport(data) {
     let name = data.name;
     let report = data.data;
 
+    let overall_status = "success";
+
     let reportLIs = "";
 
     report.reports.forEach(el => {
@@ -65,6 +67,10 @@ function JSONReport(data) {
         else if (el.status === "fail") status = "danger";
         else if (el.status === "error") status = "danger";
 
+        // Update the overall status
+        if (status === "warning" && overall_status === "success") overall_status = "warning";
+        else if (status === "danger" && (overall_status === "success" || overall_status === "warning")) overall_status = "danger";
+
         reportLIs += `
         <li class="list-group-item">
             <span class="badge text-bg-${status}">${el.status.toUpperCase()}</span> ${el.node_name}<br>
@@ -76,7 +82,7 @@ function JSONReport(data) {
 
     let reportHTML = `
     <div class="col">
-        <div class="card border-success">
+        <div class="card border-${overall_status}">
             <div class="card-body">
                 <h5 class="card-title">${name}</h5>
                 <code>
