@@ -59,7 +59,7 @@ function JSONReport(data) {
     report.reports.forEach(el => {
         let msg = "";
         if (el.message.length > 0)
-            msg = `<details><summary class="text-muted small">Details</summary><p>${el.message}</p></details>`;
+            msg = `<details class="mt-1"><summary class="text-muted small">Details</summary><p>${el.message}</p></details>`;
 
         let status;
         if (el.status === "pass") status = "success";
@@ -73,8 +73,8 @@ function JSONReport(data) {
 
         reportLIs += `
         <li class="list-group-item">
-            <span class="badge text-bg-${status}">${el.status.toUpperCase()}</span> ${el.node_name}<br>
-            <code>${el.node_type}</code>
+            <span class="badge text-bg-${status}">${el.status.toUpperCase()}</span>
+            <span data-bs-toggle="tooltip" data-bs-placement="right" data-bs-custom-class="custom-tooltip" title="${el.node_type}">${el.node_name}</span>
             ${msg}
         </li>
         `;
@@ -85,14 +85,9 @@ function JSONReport(data) {
     reportEl.innerHTML = `
     <div class="card border-${overall_status}">
         <div class="card-body">
-            <h5 class="card-title">${name}</h5>
-            <code>
-                ${report.asset_path}
-            </code>
-            <p class="card-subtitle mt-1 mb-2 text-muted small">
-                Cooked: ${report.cook_success}, ${report.user}@${report.node}, ${report.time}
-            </p>
-            <ul class="list-group">
+            <h5 class="card-title" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" title="Cooked: ${report.cook_success}, ${report.user}@${report.node}, ${report.time}">${name}</h5>
+            <code>${report.asset_path}</code>
+            <ul class="list-group mt-2">
                 ${reportLIs}
             </ul>
         </div>
@@ -100,4 +95,8 @@ function JSONReport(data) {
     `;
 
     reportsEl.appendChild(reportEl);
+
+    // https://getbootstrap.com/docs/5.2/components/tooltips/#enable-tooltips
+    let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    let _ = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 };

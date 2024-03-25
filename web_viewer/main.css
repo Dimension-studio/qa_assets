@@ -23,3 +23,7 @@ html {
 .new-report {
     animation: append-animate 0.07s ease-in-out;
 }
+
+.custom-tooltip {
+    font-family: monospace;
+}
