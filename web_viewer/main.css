@@ -1,3 +1,19 @@
 .border-dashed {
     border-style: dashed !important;
 }
+
+@keyframes append-animate {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.new-report {
+    animation: append-animate 0.1s ease-in-out;
+}

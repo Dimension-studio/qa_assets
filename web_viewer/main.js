@@ -77,27 +77,27 @@ function JSONReport(data) {
             <code>${el.node_type}</code>
             ${msg}
         </li>
-        `
+        `;
     });
 
-    let reportHTML = `
-    <div class="col">
-        <div class="card border-${overall_status}">
-            <div class="card-body">
-                <h5 class="card-title">${name}</h5>
-                <code>
-                    ${report.asset_path}
-                </code>
-                <p class="card-subtitle mt-1 mb-2 text-muted small">
-                    Cooked: ${report.cook_success}, ${report.user}@${report.node}, ${report.time}
-                </p>
-                <ul class="list-group">
-                    ${reportLIs}
-                </ul>
-            </div>
+    let reportEl = document.createElement("div");
+    reportEl.classList.add("col", "new-report");
+    reportEl.innerHTML = `
+    <div class="card border-${overall_status}">
+        <div class="card-body">
+            <h5 class="card-title">${name}</h5>
+            <code>
+                ${report.asset_path}
+            </code>
+            <p class="card-subtitle mt-1 mb-2 text-muted small">
+                Cooked: ${report.cook_success}, ${report.user}@${report.node}, ${report.time}
+            </p>
+            <ul class="list-group">
+                ${reportLIs}
+            </ul>
         </div>
     </div>
-    `
+    `;
 
-    reportsEl.innerHTML += reportHTML;
+    reportsEl.appendChild(reportEl);
 };
